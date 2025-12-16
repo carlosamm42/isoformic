@@ -64,7 +64,7 @@ IsoformicExperiment <- S7::new_class(
       #   if (
       #     isFALSE(is.character(value)) ||
       #       isTRUE(rlang::is_null(value)) ||
-      #       isTRUE(length(value) != 1)
+      #       !identical(length(value), 1L)
       #   ) {
       #     cli::cli_abort(
       #       message = c(
@@ -157,7 +157,7 @@ IsoformicExperiment <- S7::new_class(
     )
   ),
   validator = function(self) {
-    if (isTRUE(length(self@experiment_name) > 1)) {
+    if (isTRUE(length(self@experiment_name) > 1L)) {
       cli::cli_abort(
         message = c(
           x = "{.var experiment_name} must be a single character string."
@@ -169,7 +169,7 @@ IsoformicExperiment <- S7::new_class(
     if (isFALSE(rlang::is_null(self@data_path))) {
       if (
         isFALSE(is.character(self@data_path)) ||
-          isTRUE(length(self@data_path) != 1)
+          !identical(length(self@data_path), 1L)
       ) {
         cli::cli_abort(
           message = c(
@@ -201,13 +201,13 @@ IsoformicExperiment <- S7::new_class(
       }
     }
 
-    if (isTRUE(length(self@assay) > 0)) {
+    if (isTRUE(length(self@assay) > 0L)) {
       for (assay_name in names(self@assay)) {
         validate_assay_rownames(self, assay_name)
         validate_assay_colnames(self, assay_name)
       }
     }
-    if (isFALSE(rlang::is_null(self@dea)) && isTRUE(length(self@dea) > 0)) {
+    if (isFALSE(rlang::is_null(self@dea)) && isTRUE(length(self@dea) > 0L)) {
       validate_dea(self)
     }
     return(NULL)
@@ -289,7 +289,7 @@ S7::method(col_names, IsoformicExperiment) <- function(self) {
 #' @export
 row_names <- S7::new_generic("row_names", "self")
 S7::method(row_names, IsoformicExperiment) <- function(self) {
-  if (length(self@assay) == 0L) {
+  if (identical(length(self@assay), 0L)) {
     return(0L)
   }
   assay_name <- names(self@assay)[1]
@@ -308,7 +308,7 @@ S7::method(row_names, IsoformicExperiment) <- function(self) {
 # S7::method(rownames, IsoformicExperiment) <- function(x, do.NULL, prefix) {
 # rownames.IsoformicExperiment <- function(x, do.NULL, prefix) {
 #  rlang::check_required(x)
-#  if (length(x@assay) == 0L) {
+#  if (identical(length(x@assay), 0L)) {
 #    return(0L)
 #  }
 #  assay_name <- names(x@assay)[1]
@@ -360,7 +360,7 @@ S7::method(print, IsoformicExperiment) <- function(x, ...) {
 }
 
 S7::method(dimnames, IsoformicExperiment) <- function(x) {
-  if (length(x@assay) == 0L) {
+  if (identical(length(x@assay), 0L)) {
     return(list(NULL, NULL))
   }
   assay_name <- names(x@assay)[1]
@@ -369,7 +369,7 @@ S7::method(dimnames, IsoformicExperiment) <- function(x) {
 }
 
 S7::method(dim, IsoformicExperiment) <- function(x) {
-  if (length(x@assay) == 0L) {
+  if (identical(length(x@assay), 0L)) {
     return(c(0L, 0L))
   }
   assay_name <- names(x@assay)[1]
@@ -400,7 +400,7 @@ row_data <- S7::new_generic("row_data", "self")
 
 S7::method(row_data, IsoformicExperiment) <- function(self) {
   .data <- rlang::.data
-  if (isTRUE(length(rownames(self)) == 0L)) {
+  if (identical(length(rownames(self)), 0L)) {
     return(tibble::tibble())
   }
 

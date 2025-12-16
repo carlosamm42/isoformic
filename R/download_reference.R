@@ -117,30 +117,30 @@ download_reference <- function(
     file_string <- switch(
       organism,
       human = {
-        version_num <- as.numeric(version)
-        if (version_num >= 44) {
+        version_num <- as.integer(version)
+        if (isTRUE(version_num >= 44L)) {
           "GRCh38.p14.genome.fa.gz"
-        } else if (version_num >= 32) {
+        } else if (isTRUE(version_num >= 32L)) {
           "GRCh38.p13.genome.fa.gz"
-        } else if (version_num >= 28) {
+        } else if (isTRUE(version_num >= 28L)) {
           "GRCh38.p12.genome.fa.gz"
-        } else if (version_num >= 26) {
+        } else if (isTRUE(version_num >= 26L)) {
           "GRCh38.p10.genome.fa.gz"
-        } else if (version_num == 25) {
+        } else if (identical(version_num, 25L)) {
           "GRCh38.p7.genome.fa.gz"
-        } else if (version_num == 24) {
+        } else if (identical(version_num, 24L)) {
           "GRCh38.p5.genome.fa.gz"
-        } else if (version_num == 23) {
+        } else if (identical(version_num, 23L)) {
           "GRCh38.p3.genome.fa.gz"
-        } else if (version_num == 22) {
+        } else if (identical(version_num, 22L)) {
           "GRCh38.p2.genome.fa.gz"
-        } else if (version_num %in% c(20, 21)) {
+        } else if (identical(version_num, 20L) || identical(version_num, 21L)) {
           "GRCh38.genome.fa.gz"
-        } else if (version_num == 19) {
+        } else if (identical(version_num, 19L)) {
           "GRCh37.p13.genome.fa.gz"
-        } else if (version_num == 18) {
+        } else if (identical(version_num, 18L)) {
           "GRCh37.p12.genome.fa.gz"
-        } else if (version_num == 17) {
+        } else if (identical(version_num, 17L)) {
           "GRCh37.p11.genome.fa.gz"
         } else {
           cli::cli_abort(
@@ -157,17 +157,17 @@ download_reference <- function(
         version_num <- as.numeric(version_num)
         if (version_num >= 26) {
           "GRCm39.genome.fa.gz"
-        } else if (version_num >= 17) {
+        } else if (isTRUE(version_num >= 17L)) {
           "GRCm38.p6.genome.fa.gz"
-        } else if (version_num >= 12) {
+        } else if (isTRUE(version_num >= 12L)) {
           "GRCm38.p5.genome.fa.gz"
-        } else if (version_num >= 6) {
+        } else if (isTRUE(version_num >= 6L)) {
           "GRCm38.p4.genome.fa.gz"
-        } else if (version_num >= 3) {
+        } else if (isTRUE(version_num >= 3L)) {
           "GRCm38.p3.genome.fa.gz"
-        } else if (version_num == 2) {
+        } else if (identical(version_num, 2L)) {
           "GRCm38.p2.genome.fa.gz"
-        } else if (version_num == 1) {
+        } else if (identical(version_num, 1L)) {
           "NCBIM37.genome.fa.gz"
         } else {
           cli::cli_abort(
@@ -247,7 +247,7 @@ download_reference <- function(
       )
     }
   )
-  if (isTRUE(download_res == 0)) {
+  if (identical(download_res, 0L)) {
     cli::cli_inform(
       c(
         `v` = "{.path {full_output_path}} successfully downloaded."

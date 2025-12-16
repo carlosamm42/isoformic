@@ -15,7 +15,7 @@ check_installed <- function(pkgs) {
       missing_pkgs <- c(missing_pkgs, pkg)
     }
   }
-  if (isTRUE(length(missing_pkgs) == 0L)) {
+  if (identical(length(missing_pkgs), 0L)) {
     return(invisible(TRUE))
   } else {
     return_res <- FALSE
