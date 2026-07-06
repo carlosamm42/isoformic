@@ -97,6 +97,7 @@ download_reference <- function(
   file_type <- stringr::str_to_lower(file_type)
   file_type <- rlang::arg_match(file_type)
   version <- as.character(version)
+
   if (identical(output_path, ":cache:")) {
     output_path <- get_isoformic_cache()
   }
@@ -232,7 +233,8 @@ download_reference <- function(
           download_res <- utils::download.file(
             url = download_url,
             destfile = full_output_path,
-            method = method
+            method = method,
+            mode = "wb"
           )
         },
         error = function(cnd) {

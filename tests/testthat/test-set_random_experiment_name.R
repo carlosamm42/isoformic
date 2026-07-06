@@ -1,7 +1,7 @@
 testthat::test_that("set_random_experiment_name - generates a valid name", {
   name <- set_random_experiment_name()
   testthat::expect_true(is.character(name))
-  testthat::expect_equal(length(name), 1)
+  testthat::expect_equal(length(name), 1L)
 })
 
 testthat::test_that("set_random_experiment_name - creates data_path directory", {

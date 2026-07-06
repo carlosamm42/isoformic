@@ -13,7 +13,7 @@
 #' @param ext An optional file extension (e.g., "rds", "csv") to append to
 #' the final path.
 #'
-#' @return
+#' @returns
 #' A path character string representing the path to the user cache
 #' directory for the `isoformic` package.
 #'
