@@ -39,3 +39,5 @@
 ^vignettes/articles/data-raw$
 ^README_files/$
 ^readme_cache/$
+^[.]?air[.]toml$
+^\.vscode$

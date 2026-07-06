@@ -41,7 +41,7 @@ Development Changelog: [dev](https://github.com/luciorq/isoformic/compare/v0.1.2
 ### Changed
 
 * Argument `file_type` in `download_reference()` is now `"gff"` by default.
-* Default GENCODE `version` in `download_reference()` is now `"49"` by default.
+* GENCODE `version` in `download_reference()` is now `"49"` by default.
 * Argument `output_path` in `download_reference()` is now `":cache:"`.
 * Arguments `DEG_DET_table` and `selected_genes` in `plot_log2FC()` are now
   `de_data` and `feature`.
