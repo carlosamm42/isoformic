@@ -13,7 +13,7 @@
 #'
 #' @export
 as_isoformic <- function(se, annot_path, annot_type = c("gff", "annot_db")) {
-  # rlang::check_installed("SummarizedExperiment")
+  rlang::check_installed("SummarizedExperiment")
   rlang::check_required(se)
   rlang::check_required(annot_path)
   annot_type <- rlang::arg_match(annot_type)

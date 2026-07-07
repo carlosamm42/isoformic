@@ -13,15 +13,7 @@
 prepare_annotation <- function(file_path, file_type = c("gtf", "gff")) {
   file_type <- stringr::str_to_lower(file_type)
   file_type <- rlang::arg_match(file_type)
-  .data <- rlang::.data
-  if (!isTRUE(fs::file_exists(file_path))) {
-    cli::cli_abort(
-      message = c(
-        x = "{.path {file_path}} do {.strong not} exist."
-      ),
-      class = "isoformic_annot_file_dont_exist"
-    )
-  }
+  assert_file_exists(file_path)
   annot_df <- vroom::vroom(
     file = file_path,
     delim = "\t",

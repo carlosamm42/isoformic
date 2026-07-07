@@ -28,14 +28,8 @@ prepare_annotation_db <- function(
     )
   }
 
-  if (!isTRUE(fs::file_exists(input_path))) {
-    cli::cli_abort(
-      message = c(
-        x = "{.path {input_path}} do {.strong not} exist."
-      ),
-      class = "isoformic_annot_file_dont_exist"
-    )
-  }
+  assert_file_exists(input_path)
+
   if (!isTRUE(fs::dir_exists(fs::path_dir(parquet_file_path)))) {
     fs::dir_create(fs::path_dir(parquet_file_path), recurse = TRUE)
   }

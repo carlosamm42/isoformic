@@ -41,3 +41,6 @@
 ^readme_cache/$
 ^[.]?air[.]toml$
 ^\.vscode$
+^PLAN\.md$
+^TODO\.md$
+

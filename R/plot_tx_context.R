@@ -17,8 +17,6 @@ plot_tx_context <- function(
   if (isFALSE(tibble::is_tibble(exon_table))) {
     exon_table <- tibble::as_tibble(exon_table)
   }
-  .data <- rlang::.data
-  .env <- rlang::.env
   exon_table <- exon_table |>
     dplyr::mutate(
       exon_left = as.integer(.data$exon_left),
@@ -26,7 +24,7 @@ plot_tx_context <- function(
     )
 
   exon_table <- exon_table |>
-    dplyr::group_by(tx_id) |>
+    dplyr::group_by(.data$tx_id) |>
     dplyr::arrange(.data$tx_id, .data$exon_right) |>
     dplyr::ungroup()
 
@@ -50,30 +48,37 @@ plot_tx_context <- function(
 
   plot_data[nrow(plot_data), "segment_start"] <- NA_integer_
 
-  tx_id_vector <- plot_data$tx_id
-
   # TODO: @luciorq pass DEG_DET_table as an argument, or remove if not needed
   # DEG_DET_table_nogene <- DEG_DET_table |>
   #   dplyr::filter(transcript_type != "gene")
   # DEG_DET_table_nogene$transcript_type <- as.factor(DEG_DET_table_nogene$transcript_type)
 
-  # tx_id = tx_id_vector[1]
-  for (tx_id in tx_id_vector) {
-    tx_id_data <- plot_data[plot_data$tx_id %in% tx_id, ]
-    exon_right_max <- base::max(tx_id_data$exon_right, na.rm = TRUE)
-    plot_data[
-      plot_data$tx_id %in% tx_id & plot_data$exon_right == exon_right_max,
-      "segment_start"
-    ] <- NA_integer_
-    plot_data[
-      plot_data$tx_id %in% tx_id & plot_data$exon_right == exon_right_max,
-      "segment_middle"
-    ] <- NA_integer_
-    plot_data[
-      plot_data$tx_id %in% tx_id & plot_data$exon_right == exon_right_max,
-      "segment_end"
-    ] <- NA_integer_
-  }
+  # For the last exon of each transcript there is no following exon to draw
+  # a connecting segment to/from, so those segment columns are set to NA.
+  # Vectorized replacement for the previous per-`tx_id` `for` loop.
+  plot_data <- plot_data |>
+    dplyr::group_by(.data$tx_id) |>
+    dplyr::mutate(
+      is_last_exon = .data$exon_right ==
+        base::max(.data$exon_right, na.rm = TRUE),
+      segment_start = dplyr::if_else(
+        .data$is_last_exon,
+        NA_integer_,
+        .data$segment_start
+      ),
+      segment_middle = dplyr::if_else(
+        .data$is_last_exon,
+        NA_integer_,
+        .data$segment_middle
+      ),
+      segment_end = dplyr::if_else(
+        .data$is_last_exon,
+        NA_integer_,
+        .data$segment_end
+      )
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::select(-"is_last_exon")
 
   # TODO: @luciorq tx_to_gene should be passed as an argument?
   # tx_id_to_name <- tx_to_gene |>
@@ -82,7 +87,7 @@ plot_tx_context <- function(
   #  )
 
   plot_data |>
-    dplyr::arrange(tx_id) |>
+    dplyr::arrange(.data$tx_id) |>
     # dplyr::left_join(tx_id_to_name, by = c("tx_id" = "transcript_id")) |>
     ggplot2::ggplot() +
     ggplot2::geom_rect(

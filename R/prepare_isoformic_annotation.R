@@ -22,14 +22,7 @@ prepare_isoformic_annotation <- function(
   file_type <- stringr::str_to_lower(file_type)
   file_type <- rlang::arg_match(file_type)
 
-  if (!isTRUE(fs::file_exists(input_path))) {
-    cli::cli_abort(
-      message = c(
-        x = "{.path {input_path}} do {.strong not} exist."
-      ),
-      class = "isoformic_annot_file_dont_exist"
-    )
-  }
+  assert_file_exists(input_path)
   if (isTRUE(rlang::is_null(output_path) || identical(output_path, ""))) {
     parquet_path <- get_isoformic_cache()
   } else {

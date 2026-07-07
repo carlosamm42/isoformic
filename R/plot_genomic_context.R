@@ -40,8 +40,6 @@ plot_genomic_context <- function(
   upstream_offset = 0,
   ideogram_reference = c("hg38", "hg19", "mm11", "mm10", "none")
 ) {
-  .data <- rlang::.data
-
   rlang::check_required(gene_name)
   rlang::check_required(context_data)
   ideogram_reference <- rlang::arg_match(ideogram_reference)
@@ -53,6 +51,7 @@ plot_genomic_context <- function(
   }
 
   rlang::check_installed("plotgardener")
+  rlang::check_installed(c("GenomicFeatures", "IRanges"))
 
   if (identical(ideogram_reference, "hg38")) {
     hg38_deps <- c(
@@ -74,7 +73,7 @@ plot_genomic_context <- function(
 
   custom_assembly <- plotgardener::assembly(
     # Genome = "hg38_GENCODE34",
-    Genome = paste0(
+    Genome = paste(
       context_data@assembly_name,
       context_data@annotation_name,
       sep = "_"

@@ -47,7 +47,6 @@ plot_log2FC <- function(
   feature_column = "gene_name",
   color_palette = NULL
 ) {
-  .data <- rlang::.data
   if (isFALSE(feature_column %in% colnames(de_data))) {
     cli::cli_abort(
       message = c(
@@ -178,7 +177,6 @@ S7::method(plot_log2fc, IsoformicExperiment) <- function(
       class = "isoformic_missing_dea_results"
     )
   }
-  .data <- rlang::.data
   deg_det_table <- combine_deg_det_longer(self)
   plot_obj <- plot_log2FC(
     de_data = deg_det_table,
@@ -204,17 +202,15 @@ combine_deg_det_wider <- function(isoformic_obj) {
 }
 
 combine_deg_det_longer <- function(isoformic_obj) {
-  .data <- rlang::.data
-  deg_df <- de_gene(isoformic_obj) |>
-    dplyr::left_join(
-      isoformic_obj@annot_data_genes |>
-        dplyr::select(
-          dplyr::any_of(c("gene_id", "gene_name"))
-        ) |>
-        dplyr::distinct() |>
-        dplyr::collect(),
-      by = "gene_id"
+  deg_gene_annot <- isoformic_obj@annot_data_genes |>
+    dplyr::select(
+      dplyr::any_of(c("gene_id", "gene_name"))
     ) |>
+    dplyr::distinct() |>
+    dplyr::collect()
+
+  deg_df <- de_gene(isoformic_obj) |>
+    dplyr::left_join(deg_gene_annot, by = "gene_id") |>
     dplyr::distinct() |>
     dplyr::mutate(
       feature_id = .data$gene_id,
@@ -222,19 +218,8 @@ combine_deg_det_longer <- function(isoformic_obj) {
     ) |>
     dplyr::rename(is_de = "deg_sig") |>
     dplyr::mutate(feature_type = "gene") |>
-    dplyr::select(
-      dplyr::any_of(c(
-        "feature_id",
-        "feature_name",
-        "gene_id",
-        "gene_name",
-        "feature_type",
-        "log2FC",
-        "pvalue",
-        "qvalue",
-        "is_de"
-      ))
-    )
+    select_deg_det_cols()
+
   det_df <- de_tx(isoformic_obj) |>
     dplyr::left_join(
       isoformic_obj@annot_data_transcripts |>
@@ -248,26 +233,24 @@ combine_deg_det_longer <- function(isoformic_obj) {
       by = "transcript_id"
     ) |>
     dplyr::distinct() |>
-    dplyr::left_join(
-      isoformic_obj@annot_data_genes |>
-        dplyr::select(
-          dplyr::any_of(c("gene_id", "gene_name"))
-        ) |>
-        dplyr::distinct() |>
-        dplyr::collect(),
-      by = "gene_id"
-    ) |>
+    dplyr::left_join(deg_gene_annot, by = "gene_id") |>
     dplyr::distinct() |>
-    # dplyr::mutate(
-    #  feature_id = .data$transcript_id,
-    #  feature_name = .data$transcript_name
-    # ) |>
     dplyr::rename(
       feature_id = "transcript_id",
       feature_name = "transcript_name",
       feature_type = "transcript_type",
       is_de = "det_sig"
     ) |>
+    select_deg_det_cols()
+
+  dplyr::bind_rows(deg_df, det_df)
+}
+
+#' Select the Common Columns Shared by DEG/DET Long-Format Tables
+#' @keywords internal
+#' @noRd
+select_deg_det_cols <- function(data) {
+  data |>
     dplyr::select(
       dplyr::any_of(c(
         "feature_id",
@@ -281,6 +264,4 @@ combine_deg_det_longer <- function(isoformic_obj) {
         "is_de"
       ))
     )
-
-  dplyr::bind_rows(deg_df, det_df)
 }

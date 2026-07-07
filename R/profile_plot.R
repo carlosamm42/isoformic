@@ -9,7 +9,6 @@
 #' @export
 plot_tx_expr <- function(genes_to_plot, profile_data) {
   # dependencies
-  .data <- rlang::.data
 
   # genes_to_plot <- "ATF3"
   # profile_data <- profile_data_df
@@ -26,12 +25,9 @@ plot_tx_expr <- function(genes_to_plot, profile_data) {
   dodge_value <- ggplot2::position_dodge(width = 0.008)
 
   calculate_sd_min <- function(x, y) {
-    for (i in seq_along(x)) {
-      if (x[i] - y[i] < 0) {
-        x[i] <- 0
-        y[i] <- 0
-      }
-    }
+    negative <- (x - y) < 0
+    x[negative] <- 0
+    y[negative] <- 0
     return(log2((x - y) + 1))
   }
 

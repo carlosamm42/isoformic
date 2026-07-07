@@ -83,7 +83,6 @@ create_context_data <- function(
   tx_type_palette = NULL
 ) {
   rlang::check_dots_empty()
-  .data <- rlang::.data
   context_data <- ContextData()
   context_data@gff_file <- gff_file
   context_data@organism <- organism

@@ -139,7 +139,6 @@ IsoformicExperiment <- S7::new_class(
           return(self)
         }
 
-        message(names(value))
         if (
           !is.character(value) ||
             rlang::is_null(names(value))
@@ -399,35 +398,10 @@ S7::method(tx_to_gene, IsoformicExperiment) <- function(self) {
 row_data <- S7::new_generic("row_data", "self")
 
 S7::method(row_data, IsoformicExperiment) <- function(self) {
-  .data <- rlang::.data
   if (identical(length(rownames(self)), 0L)) {
     return(tibble::tibble())
   }
-
-  cols_to_remove <- c(
-    "seqid",
-    "start_pos",
-    "end_pos",
-    "strand"
-  )
-
-  self@annot_data_transcripts |>
-    dplyr::select(-dplyr::any_of(cols_to_remove)) |>
-    # dplyr::select("transcript_id", "gene_id") |>
-    dplyr::distinct() |>
-    dplyr::left_join(
-      y = self@annot_data_genes |>
-        dplyr::select(
-          dplyr::any_of(c("gene_id", "gene_name", "gene_type"))
-        ) |>
-        dplyr::distinct(),
-      by = "gene_id"
-    ) |>
-    dplyr::filter(
-      .data$transcript_id %in% rownames(self)
-    ) |>
-    dplyr::distinct() |>
-    dplyr::collect()
+  get_tx_gene_annot(self, filter_to_assay_rownames = TRUE)
 }
 
 #' Retrieve Transcript Annotation Table
@@ -436,15 +410,26 @@ S7::method(row_data, IsoformicExperiment) <- function(self) {
 tx_annot <- S7::new_generic("tx_annot", "self")
 
 S7::method(tx_annot, IsoformicExperiment) <- function(self) {
+  get_tx_gene_annot(self, filter_to_assay_rownames = FALSE)
+}
+
+#' Combine Transcript and Gene Level Annotation Tables
+#'
+#' Shared implementation for [tx_annot()] and [row_data()], which only
+#' differ in whether the result is filtered down to the transcript IDs
+#' currently present in the object's assay row names.
+#' @keywords internal
+#' @noRd
+get_tx_gene_annot <- function(self, filter_to_assay_rownames = FALSE) {
   cols_to_remove <- c(
     "seqid",
     "start_pos",
     "end_pos",
     "strand"
   )
-  self@annot_data_transcripts |>
+
+  annot_query <- self@annot_data_transcripts |>
     dplyr::select(-dplyr::any_of(cols_to_remove)) |>
-    # dplyr::select("transcript_id", "gene_id") |>
     dplyr::distinct() |>
     dplyr::left_join(
       y = self@annot_data_genes |>
@@ -453,7 +438,16 @@ S7::method(tx_annot, IsoformicExperiment) <- function(self) {
         ) |>
         dplyr::distinct(),
       by = "gene_id"
-    ) |>
+    )
+
+  if (isTRUE(filter_to_assay_rownames)) {
+    annot_query <- annot_query |>
+      dplyr::filter(
+        .data$transcript_id %in% rownames(self)
+      )
+  }
+
+  annot_query |>
     dplyr::distinct() |>
     dplyr::collect()
 }
@@ -477,9 +471,6 @@ S7::method(de_gene, IsoformicExperiment) <- function(self, de_type = "deg") {
 }
 
 get_dea_results <- function(self, de_type = c("det", "deg")) {
-  .data <- rlang::.data
-  .env <- rlang::.env
-  `:=` <- rlang::`:=`
   de_type <- rlang::arg_match(de_type)
   if (isTRUE(rlang::is_null(self@dea[[de_type]]))) {
     cli::cli_abort(

@@ -10,16 +10,7 @@ prepare_exon_annotation <- function(
 ) {
   file_type <- stringr::str_to_lower(file_type)
   file_type <- rlang::arg_match(file_type)
-  .data <- rlang::.data
-  .env <- rlang::.env
-  if (!isTRUE(fs::file_exists(file_path))) {
-    cli::cli_abort(
-      message = c(
-        x = "{.path {file_path}} do {.strong not} exist."
-      ),
-      class = "isoformic_annot_file_dont_exist"
-    )
-  }
+  assert_file_exists(file_path)
   if (isTRUE(file_type %in% c("gff"))) {
     gff_file_path <- fs::path(file_path)
     annot_df <- readr::read_table(
@@ -41,49 +32,42 @@ prepare_exon_annotation <- function(
     )
   }
   gene_annot_df <- tibble::tibble()
-  for (i in gene_name) {
-    gene_annot_df_temp <- annot_df |>
-      dplyr::filter(
-        stringr::str_detect(.data$X9, paste0("gene_name=", i, ";"))
-      )
-    gene_annot_df <- dplyr::bind_rows(gene_annot_df, gene_annot_df_temp)
+  if (length(gene_name) > 0L) {
+    gene_pattern <- paste(
+      paste0("gene_name=", gene_name, ";"),
+      collapse = "|"
+    )
+    gene_annot_df <- annot_df |>
+      dplyr::filter(stringr::str_detect(.data$X9, gene_pattern))
   }
 
   tx_id_vector <- gene_annot_df |>
     dplyr::filter(.data$X3 %in% "transcript") |>
-    dplyr::select(.data$X9) |>
+    dplyr::select("X9") |>
     dplyr::mutate(
       tx_id = stringr::str_extract(.data$X9, "transcript_id=.*?;") |>
         stringr::str_remove("^transcript_id=") |>
         stringr::str_remove(";")
     ) |>
     dplyr::select("tx_id") |>
-    dplyr::arrange() |>
     dplyr::distinct() |>
     dplyr::pull("tx_id")
 
-  # parent_id <- tx_id_vector[1]
-  tx_exon_table <- tx_id_vector |>
-    purrr::map_dfr(
-      .f = \(parent_id) {
-        gene_annot_df |>
-          dplyr::filter(
-            .data$X3 %in% "exon",
-            stringr::str_detect(
-              .data$X9,
-              glue::glue("Parent={.env$parent_id};")
-            )
-          ) |>
-          dplyr::mutate(
-            tx_name = stringr::str_extract(.data$X9, "gene_name=.*?;") |>
-              stringr::str_remove("^gene_name=") |>
-              stringr::str_remove(";")
-          ) |>
-          dplyr::select(c("X4", "X5", "X7", "tx_name")) |>
-          dplyr::mutate(tx_id = .env$parent_id) |>
-          dplyr::relocate("tx_name", .after = "tx_id")
-      }
-    ) #|>
+  # Single vectorized pass over all exons instead of one `str_detect()` scan
+  # of the whole table per transcript (previously via `purrr::map_dfr()`).
+  tx_exon_table <- gene_annot_df |>
+    dplyr::filter(.data$X3 %in% "exon") |>
+    dplyr::mutate(
+      tx_id = stringr::str_extract(.data$X9, "Parent=.*?;") |>
+        stringr::str_remove("^Parent=") |>
+        stringr::str_remove(";"),
+      tx_name = stringr::str_extract(.data$X9, "gene_name=.*?;") |>
+        stringr::str_remove("^gene_name=") |>
+        stringr::str_remove(";")
+    ) |>
+    dplyr::filter(.data$tx_id %in% tx_id_vector) |>
+    dplyr::select(c("X4", "X5", "X7", "tx_id", "tx_name")) |>
+    dplyr::relocate("tx_name", .after = "tx_id")
   # dplyr::mutate(tx_name = gene_name)
   tx_exon_table <- tx_exon_table |>
     dplyr::rename(

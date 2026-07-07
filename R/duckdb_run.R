@@ -41,7 +41,7 @@ duckdb_run <- function(
     DBI::dbConnect(
       drv = duckdb::duckdb(),
       dbdir = db_storage_str,
-      read_only = TRUE
+      read_only = read_only
     )
   )
   sql_str <- glue::glue_sql(sql_string, .con = conn_obj, .envir = envir)

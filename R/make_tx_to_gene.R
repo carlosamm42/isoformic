@@ -36,13 +36,8 @@ make_tx_to_gene <- function(
   file_path,
   file_type = c("fasta", "gff", "gtf")
 ) {
-  .data <- rlang::.data
   file_type <- rlang::arg_match(file_type)
-  if (!isTRUE(fs::file_exists(file_path))) {
-    cli::cli_abort(
-      c(`x` = "{.path {file_path}} do not exist.")
-    )
-  }
+  assert_file_exists(file_path)
   if (isTRUE(file_type == "fasta")) {
     fasta_lines <- readr::read_lines(file_path)
     vector_detect <- stringr::str_detect(fasta_lines, "^>.")

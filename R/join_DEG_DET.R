@@ -4,9 +4,9 @@
 #' annotates the combined data with significance labels based on specified cutoffs, and filters
 #' transcripts based on their types.
 #'
-#' @param DEG_tab A `data.frame` or `tibble` containing gene-level differential expression results,
+#' @param deg_table A `data.frame` or `tibble` containing gene-level differential expression results,
 #'   including `gene_id`, `gene_name`, `log2FC`, and `pvalue` columns.
-#' @param DET_final_tab A `data.frame` or `tibble` containing transcript-level differential expression results,
+#' @param det_table A `data.frame` or `tibble` containing transcript-level differential expression results,
 #'   including `transcript_id`, `transcript_name`, `transcript_type`, `log2FC`, and `pvalue` columns.
 #' @param logfc_cut A numeric value specifying the absolute log2 fold-change cutoff for significance.
 #' @param pval_cut A numeric value specifying the p-value cutoff for significance.
@@ -20,7 +20,7 @@
 #'
 #' @examples
 #' # Sample gene-level data
-#' DEG_tab <- data.frame(
+#' deg_table <- data.frame(
 #'   gene_id = c("gene1", "gene2"),
 #'   gene_name = c("GeneA", "GeneB"),
 #'   log2FC = c(1.5, -2.0),
@@ -28,7 +28,7 @@
 #' )
 #'
 #' # Sample transcript-level data
-#' DET_final_tab <- data.frame(
+#' det_table <- data.frame(
 #'   transcript_id = c("tx1", "tx2", "tx3"),
 #'   transcript_name = c("Transcript1", "Transcript2", "Transcript3"),
 #'   transcript_type = c("protein_coding", "lncRNA", "processed_transcript"),
@@ -37,34 +37,33 @@
 #' )
 #'
 #' # Merge and annotate differential expression results
-#' DEGs_DETs_table <- join_DEG_DET(
-#'   DEG_tab = DEG_tab,
-#'   DET_final_tab = DET_final_tab,
+#' deg_det_table <- join_DEG_DET(
+#'   deg_table = deg_table,
+#'   det_table = det_table,
 #'   logfc_cut = 1,
 #'   pval_cut = 0.05
 #' )
 #'
 #' # View the result
-#' print(DEGs_DETs_table)
+#' print(deg_det_table)
 #'
 #' @export
 join_DEG_DET <- function(
-  DEG_tab,
-  DET_final_tab,
+  deg_table,
+  det_table,
   logfc_cut,
   pval_cut
 ) {
-  .data <- rlang::.data
-  DEG_tab_mod <- DEG_tab |>
+  deg_table_mod <- deg_table |>
     dplyr::rename(id = "gene_id")
-  DEG_tab_mod <- DEG_tab_mod |>
+  deg_table_mod <- deg_table_mod |>
     dplyr::rename(name = "gene_name")
-  DEG_tab_mod <- DEG_tab_mod |>
+  deg_table_mod <- deg_table_mod |>
     dplyr::mutate(transcript_type = "gene")
-  DEG_tab_mod <- DEG_tab_mod |>
+  deg_table_mod <- deg_table_mod |>
     dplyr::mutate(gene_name = .data[["name"]])
 
-  DET_final_tab <- DET_final_tab |>
+  det_table <- det_table |>
     dplyr::filter(
       .data[["transcript_type"]] %in%
         c(
@@ -85,38 +84,37 @@ join_DEG_DET <- function(
     )
 
   drop_columns <- c("DEG_sig")
-  if (any(colnames(DET_final_tab) %in% drop_columns)) {
-    DET_final_tab_mod <- DET_final_tab |>
-      dplyr::select(-dplyr::one_of(drop_columns))
+  if (any(colnames(det_table) %in% drop_columns)) {
+    det_table_mod <- det_table |>
+      dplyr::select(-dplyr::any_of(drop_columns))
   } else {
-    DET_final_tab_mod <- DET_final_tab
+    det_table_mod <- det_table
   }
 
-  DET_final_tab_mod <- DET_final_tab_mod |>
+  det_table_mod <- det_table_mod |>
     dplyr::rename(id = "transcript_id")
-  DET_final_tab_mod <- DET_final_tab_mod |>
+  det_table_mod <- det_table_mod |>
     dplyr::rename(name = "transcript_name")
-  DEG_tab_mod <- DEG_tab_mod[
-    colnames(DEG_tab_mod)[
-      colnames(DEG_tab_mod) %in% colnames(DET_final_tab_mod)
+  deg_table_mod <- deg_table_mod[
+    colnames(deg_table_mod)[
+      colnames(deg_table_mod) %in% colnames(det_table_mod)
     ]
   ]
 
-  DEGs_DETs_table <- dplyr::bind_rows(DEG_tab_mod, DET_final_tab_mod)
-  DEGs_DETs_table$significance <- c()
-  DEGs_DETs_table$abs_log2FC <- base::abs(DEGs_DETs_table$log2FC)
-  DEGs_DETs_table$significance <- "not_sig"
-  DEGs_DETs_table$DEG_sig <- "NO"
-  DEGs_DETs_table$significance[
-    DEGs_DETs_table$abs_log2FC > logfc_cut &
-      DEGs_DETs_table$pvalue < pval_cut
+  deg_det_table <- dplyr::bind_rows(deg_table_mod, det_table_mod)
+  deg_det_table$abs_log2FC <- base::abs(deg_det_table$log2FC)
+  deg_det_table$significance <- "not_sig"
+  deg_det_table$DEG_sig <- "NO"
+  deg_det_table$significance[
+    deg_det_table$abs_log2FC > logfc_cut &
+      deg_det_table$pvalue < pval_cut
   ] <- "sig"
-  DEGs_DETs_table$DEG_sig[
-    DEGs_DETs_table$abs_log2FC > logfc_cut &
-      DEGs_DETs_table$pvalue < pval_cut
+  deg_det_table$DEG_sig[
+    deg_det_table$abs_log2FC > logfc_cut &
+      deg_det_table$pvalue < pval_cut
   ] <- "YES"
 
-  DEGs_DETs_table <- DEGs_DETs_table |>
+  deg_det_table <- deg_det_table |>
     dplyr::mutate(
       is_de = dplyr::if_else(.data$significance == "sig", "yes", "no")
     ) |>
@@ -128,5 +126,5 @@ join_DEG_DET <- function(
     dplyr::select(
       -dplyr::any_of(c("abs_log2FC", "DEG_sig"))
     )
-  return(DEGs_DETs_table)
+  return(deg_det_table)
 }

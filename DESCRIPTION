@@ -1,6 +1,6 @@
 Package: isoformic
 Title: Isoform-Level Biological Interpretation of Transcriptomic Data
-Version: 0.1.2.9018
+Version: 0.1.2.9019
 Authors@R: c(
     person("Lucio Rezende", "Queiroz", , "luciorqueiroz@gmail.com", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-6090-1834")),
@@ -31,7 +31,6 @@ Imports:
     ggpubr,
     ggrepel,
     glue,
-    plotgardener,
     purrr (>= 1.1.0),
     readr,
     rlang,
@@ -39,7 +38,6 @@ Imports:
     stringr,
     tibble,
     tidyr,
-    txdbmaker,
     utils,
     vroom,
     withr
@@ -60,17 +58,19 @@ Suggests:
     mirai (>= 2.5.1),
     org.Hs.eg.db,
     patchwork,
+    plotgardener,
     quarto,
     SummarizedExperiment,
     testthat (>= 3.0.0),
     TxDb.Hsapiens.UCSC.hg38.knownGene,
+    txdbmaker,
     tximeta,
     tximport,
     viridis
 VignetteBuilder:
     quarto
 BiocViews:
-Config/Needs/dev: devtools, pkgload, remotes, rcmdcheck, covr. testthat,
+Config/Needs/dev: devtools, pkgload, remotes, rcmdcheck, covr, testthat,
     usethis, pak, knitr, quarto, pkgdown, roxygen2, roxygen2md, lintr,
     styler
 Config/Needs/website: quarto
@@ -79,4 +79,3 @@ Config/roxygen2/version: 8.0.0
 Config/testthat/edition: 3
 Config/testthat/parallel: true
 Encoding: UTF-8
-

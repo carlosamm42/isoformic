@@ -114,7 +114,7 @@ salmon_index <- function(
     no_clip_arg,
     "--type",
     "puff",
-    env_name = "salmon-env",
+    env_name = env_name,
     verbose = "output"
   )
 }
@@ -198,7 +198,7 @@ salmon_quant <- function(
     "--useVBOpt",
     "--numGibbsSamples",
     num_gibbs,
-    env_name = "salmon-env",
+    env_name = env_name,
     verbose = "output"
   )
 }

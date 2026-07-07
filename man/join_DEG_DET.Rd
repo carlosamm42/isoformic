@@ -4,13 +4,13 @@
 \alias{join_DEG_DET}
 \title{Merge Gene and Transcript Level Differential Expression Tables}
 \usage{
-join_DEG_DET(DEG_tab, DET_final_tab, logfc_cut, pval_cut)
+join_DEG_DET(deg_table, det_table, logfc_cut, pval_cut)
 }
 \arguments{
-\item{DEG_tab}{A \code{data.frame} or \code{tibble} containing gene-level differential expression results,
+\item{deg_table}{A \code{data.frame} or \code{tibble} containing gene-level differential expression results,
 including \code{gene_id}, \code{gene_name}, \code{log2FC}, and \code{pvalue} columns.}
 
-\item{DET_final_tab}{A \code{data.frame} or \code{tibble} containing transcript-level differential expression results,
+\item{det_table}{A \code{data.frame} or \code{tibble} containing transcript-level differential expression results,
 including \code{transcript_id}, \code{transcript_name}, \code{transcript_type}, \code{log2FC}, and \code{pvalue} columns.}
 
 \item{logfc_cut}{A numeric value specifying the absolute log2 fold-change cutoff for significance.}
@@ -34,7 +34,7 @@ transcripts based on their types.
 }
 \examples{
 # Sample gene-level data
-DEG_tab <- data.frame(
+deg_table <- data.frame(
   gene_id = c("gene1", "gene2"),
   gene_name = c("GeneA", "GeneB"),
   log2FC = c(1.5, -2.0),
@@ -42,7 +42,7 @@ DEG_tab <- data.frame(
 )
 
 # Sample transcript-level data
-DET_final_tab <- data.frame(
+det_table <- data.frame(
   transcript_id = c("tx1", "tx2", "tx3"),
   transcript_name = c("Transcript1", "Transcript2", "Transcript3"),
   transcript_type = c("protein_coding", "lncRNA", "processed_transcript"),
@@ -51,14 +51,14 @@ DET_final_tab <- data.frame(
 )
 
 # Merge and annotate differential expression results
-DEGs_DETs_table <- join_DEG_DET(
-  DEG_tab = DEG_tab,
-  DET_final_tab = DET_final_tab,
+deg_det_table <- join_DEG_DET(
+  deg_table = deg_table,
+  det_table = det_table,
   logfc_cut = 1,
   pval_cut = 0.05
 )
 
 # View the result
-print(DEGs_DETs_table)
+print(deg_det_table)
 
 }

@@ -1,5 +1,4 @@
 get_annot_metadata <- function(gff_file) {
-  .data <- rlang::.data
   metadata_list <- list()
   metadata_list[["annot_name"]] <- gff_file |>
     fs::path_ext_remove() |>
@@ -59,7 +58,6 @@ get_annot_metadata <- function(gff_file) {
 
 # Utils
 get_seq_region_metadata <- function(pragma_df) {
-  .data <- rlang::.data
   pragma_df |>
     dplyr::filter(.data$key == "sequence-region") |>
     tidyr::separate_wider_delim(
@@ -77,7 +75,6 @@ get_seq_region_metadata <- function(pragma_df) {
 }
 
 get_gff_version_metadata <- function(pragma_df) {
-  .data <- rlang::.data
   pragma_df |>
     dplyr::filter(.data$key == "gff-version") |>
     dplyr::slice_head(n = 1) |>

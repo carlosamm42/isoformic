@@ -78,9 +78,6 @@ prepare_profile_data <- function(
   use_fdr = TRUE
 ) {
   # dependencies
-  .data <- rlang::.data
-  .env <- rlang::.env
-  `:=` <- rlang::`:=`
   txi_transcript <- convert_to_isoformic_tibble(txi_transcript)
   # Extract tx2gene from gene annotation table
   # renamed gene annotation to gene_metadata
@@ -207,7 +204,7 @@ prepare_profile_data <- function(
     dplyr::distinct()
 
   gene_expr_df <- gene_expr_df |>
-    dplyr::mutate(parent_gene = "genename")
+    dplyr::mutate(parent_gene = .data$genename)
 
   # Add differential expression information for tx
   transcript_expr_df <- txi_transcript |>

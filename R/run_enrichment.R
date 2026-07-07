@@ -81,8 +81,6 @@ run_enrichment <- function(
   pval_cutoff = 0.05,
   lfc_cutoff = 1
 ) {
-  .data <- rlang::.data
-  .env <- rlang::.env
   rlang::check_installed("fgsea")
   processed_or_cds <- ifelse(
     test = sum(tx_to_gene$transcript_type == "processed_transcript") > 1500,
@@ -111,8 +109,6 @@ run_enrichment <- function(
   fgsea_results_df <- base::seq_along(tx_type_names) |>
     purrr::map(
       .f = function(x) {
-        .data <- rlang::.data
-        .env <- rlang::.env
         type_vec <- tx_types_list[[x]]
         type_name <- tx_type_names[x]
         res_fgsea <- det_df |>

@@ -14,7 +14,6 @@ summarize_to_gene <- function(
   txi_transcript,
   tx_to_gene
 ) {
-  .data <- rlang::.data
   id_df <- tx_to_gene |>
     dplyr::select("transcript_id", "gene_id") |>
     dplyr::distinct()
