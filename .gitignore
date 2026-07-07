@@ -21,3 +21,6 @@ docs
 *.RData
 *.Rhistory
 .Rapp.history
+.quarto
+.positai
+
